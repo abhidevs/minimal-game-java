@@ -1,5 +1,7 @@
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 class game {
     static final int x=300;
@@ -7,14 +9,14 @@ class game {
     static JFrame mainFrame;
 
     public game(mainPanel panel){
-    mainFrame=new JFrame();
-    mainFrame.add(panel);
-    mainFrame.setSize(x,y);
-    mainFrame.setVisible(true);
+        mainFrame=new JFrame();
+        mainFrame.add(panel);
+        mainFrame.setSize(x,y);
+        mainFrame.setVisible(true);
     }
 
     public static void main(String []args){
-        mainPanel panel=new mainPanel(x,y);
+        mainPanel panel=new mainPanel(10,0);
         new game(panel);
         spawnBalls balls=new spawnBalls(panel);
         balls.run();
@@ -28,15 +30,29 @@ class mainPanel extends JPanel{
     public mainPanel(int x,int y){
         this.x=x;
         this.y=y;
+
+        Timer timer = new Timer(15, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveBall();
+                repaint();
+            }
+        });
+        timer.start();
+    }
+
+    // Updating y axis of ball every 40ms
+    protected void moveBall() {
+        y++;
     }
 
     @Override
     public void paintComponent(Graphics g) {
-        super.paintComponents(g);
+        super.paintComponent(g);
         g.setColor(Color.blue);
-        g.drawOval(10, 10, 35, 35);
-        g.fillOval(10, 10, 35, 35);
-        setDropping(g);
+        // g.drawOval(10, 10, 35, 35);
+        g.fillOval(x, y, 30, 30);
+        // setDropping(g);
     }
 
     //wrong logic feel free to remove this
