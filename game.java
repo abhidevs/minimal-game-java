@@ -2,6 +2,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class game {
 
@@ -21,7 +23,7 @@ public class game {
                 } catch (UnsupportedLookAndFeelException ex) {
                 }
 
-                JFrame frame = new JFrame("Spot");
+                JFrame frame = new JFrame("Ball Dropping Game");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setLayout(new BorderLayout());
                 Balls balls = new Balls();
@@ -50,6 +52,19 @@ public class game {
             for (int index = 0; index < ballsCount; index++) {
                 ballsUp.add(new Ball(new Color(random(255), random(255), random(255))));
             }
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent me) {
+                    super.mouseClicked(me);
+                    for (Ball ball : ballsUp) {
+                        if (verifyBallClick(ball, me.getPoint())) {
+                            System.out.println("clicked" + me.getPoint());
+                            ball.setColor(Color.RED);
+                        }
+                    }
+                }
+            });
         }
 
         @Override
@@ -65,6 +80,10 @@ public class game {
 
         public List<Ball> getBalls() {
             return ballsUp;
+        }
+
+        private boolean verifyBallClick(Ball ball, Point point) {
+            return (ball.getLocation().x <= point.x && ball.getLocation().x+ball.getSize().width >= point.x) && (ball.getLocation().y <= point.y && ball.getLocation().y+ball.getSize().height >= point.y);
         }
     }
 
@@ -86,9 +105,8 @@ public class game {
             // Randomize the starting position...
             for (Ball ball : getParent().getBalls()) {
                 int x = 10 + random(width - 50);
-                int y = random(height);
 
-                y = 120 * i + random(30);
+                int y = 120 * i + random(30);
                 i++;
 
                 ball.setLocation(new Point(x, -y));
@@ -134,26 +152,6 @@ public class game {
 
             Point p = ball.getLocation();
             p.y++;
-            // Point speed = ball.getSpeed();
-            // Dimension size = ball.getSize();
-
-            // int vx = speed.x;
-            // int vy = speed.y;
-
-            // int x = p.x;
-            // int y = p.y;
-
-            // if (x + vx < 0 || x + size.width + vx > getParent().getWidth()) {
-            //     vx *= -1;
-            // }
-            // if (y + vy < 0 || y + size.height + vy > getParent().getHeight()) {
-            //     vy *= -1;
-            // }
-            // x += vx;
-            // y += vy;
-
-            // ball.setSpeed(new Point(vx, vy));
-            // ball.setLocation(new Point(x, y));
 
         }
     }
@@ -163,13 +161,10 @@ public class game {
         private Color color;
         private Point location;
         private Dimension size;
-        // private Point speed;
 
         public Ball(Color color) {
 
             setColor(color);
-
-            // speed = new Point(10 - random(20), 10 - random(20));
             size = new Dimension(30, 30);
 
         }
@@ -193,14 +188,6 @@ public class game {
         public Point getLocation() {
             return location;
         }
-
-        // public Point getSpeed() {
-        //     return speed;
-        // }
-
-        // public void setSpeed(Point speed) {
-        //     this.speed = speed;
-        // }
 
         protected void paint(Graphics2D g2d) {
 
