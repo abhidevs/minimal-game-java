@@ -1,10 +1,25 @@
-import java.awt.*;
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import ball.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import ball.Ball;
 
 /*So now the file structure is
   |  
@@ -17,7 +32,7 @@ import ball.*;
   
 */
 
- class Balls extends JPanel {
+class Balls extends JPanel {
 
     scoreCallBack scoreCallBack;
 
@@ -30,8 +45,8 @@ import ball.*;
         ballsUp = new ArrayList<Ball>(ballsCount);
 
         for (int index = 0; index < ballsCount; index++) {
-            Ball ball=new Ball(new Color(random(255), random(255), random(255)));
-            ball.setBallValue(String.valueOf(random(50)));
+            Ball ball=new Ball(getRandomColor());
+            ball.setBallValue(String.valueOf(5 + random(45)));
             ballsUp.add(ball);
         }
 
@@ -41,11 +56,20 @@ import ball.*;
                 super.mouseClicked(me);
                 for (Ball ball : ballsUp) {
                     if (verifyBallClick(ball, me.getPoint())) {
+                        ball.setSize(0, 0);
                         scoreCallBack.ballClicked(ball);
-                      }
+                    }
                 }
             }
         });
+
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                scoreCallBack.updateTimeLeft();
+            }
+        });
+        timer.start();
     }
 
     @Override
@@ -53,7 +77,8 @@ import ball.*;
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.drawString(String.valueOf("Score: "+scoreCallBack.getScore()), 10, 15);
-        g2d.drawString(String.valueOf("Remaining Clicks: "+scoreCallBack.getRemClicks()), 260, 15);
+        g2d.drawString(String.valueOf("Time left: "+scoreCallBack.getTimeLeft()), 145, 15);
+        g2d.drawString(String.valueOf("Remaining Clicks: "+scoreCallBack.getRemClicks()), 280, 15);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         for (Ball ball : ballsUp) {
             ball.paint(g2d);
@@ -66,11 +91,32 @@ import ball.*;
     }
 
     private boolean verifyBallClick(Ball ball, Point point) {
-        return (ball.getLocation().x <= point.x && ball.getLocation().x+ball.getSize().width >= point.x) && (ball.getLocation().y <= point.y && ball.getLocation().y+ball.getSize().height >= point.y);
+        return (ball.getLocation().x-10 <= point.x && ball.getLocation().x+ball.getSize().width >= point.x+10) && (ball.getLocation().y-25 <= point.y && ball.getLocation().y+ball.getSize().height >= point.y);
     }
 
     public static int random(int maxRange) {
         return (int) Math.round((Math.random() * maxRange));
+    }
+
+    public Color getRandomColor() {
+        switch (random(7)) {
+            case 1:
+                return new Color(31, 81, 255);
+            case 2:
+                return new Color(0, 255, 127);
+            case 3:
+                return new Color(255, 0, 0);
+            case 4:
+                return new Color( 255, 195, 0 );
+            case 5:
+                return new Color(255, 87, 51);
+            case 6:
+                return new Color( 125, 249, 255 );
+            case 7:
+                return new Color( 255, 125, 184 );
+            default:
+                return new Color(31, 81, 255);
+        }
     }
 }
 
@@ -78,13 +124,16 @@ interface scoreCallBack{
     public void ballClicked(Ball ball);
     public int getScore();
     public int getRemClicks();
+    public int getTimeLeft();
+    public void updateTimeLeft();
 }
 
 public class game implements scoreCallBack{
 
     static game Game;
     static int score;
-    static int clicks=1;
+    static int clicks=5;
+    static int timeLeft=20;
     Thread engine;
     JFrame frame;
 
@@ -145,18 +194,24 @@ public class game implements scoreCallBack{
         }
         else{
             ret=false;
-            engine.stop();
-            gameOver.run();
         }
         return ret;
+    }
+
+    public int getTimeLeft() {
+        return timeLeft;
+    }
+
+    public void updateTimeLeft() {
+        timeLeft--;
     }
 
     Thread gameOver= new Thread(){
         public void run(){
             SwingUtilities.invokeLater(new Runnable(){
                 public void run(){
-                    JFrame f=new JFrame("Game Over!");
-                    frame.add(f);
+                    GameOverPanel gPanel = new GameOverPanel(50, 260, score);
+                    frame.add(gPanel);
                     frame.revalidate();
                 }
             });
@@ -194,7 +249,7 @@ public class game implements scoreCallBack{
             }
 
             while (getParent().isVisible()) {
-
+                
                 // Repaint the balls pen...
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -202,7 +257,13 @@ public class game implements scoreCallBack{
                         getParent().repaint();
                     }
                 });
-
+                
+                // If any of time or clicks gets finished the game will be over
+                if (timeLeft <= 0 || clicks <= 0) {
+                    gameOver.run();
+                    engine.stop();
+                }
+                
                 // This is a little dangrous, as it's possible
                 // for a repaint to occur while we're updating...
                 for (Ball ball : getParent().getBalls()) {
@@ -210,13 +271,16 @@ public class game implements scoreCallBack{
                         int y = -50;
                         int x = 10 + random(width - 50);
                         ball.setLocation(new Point(x, y));
+                        ball.setSize(35, 35);
+                        ball.setBallValue(String.valueOf(5 + random(45)));
+                        ball.setColor(getParent().getRandomColor());
                     }
                     move(ball);
                 }
 
                 // Some small delay...
                 try {
-                    Thread.sleep(12);
+                    Thread.sleep(15);
                 } catch (InterruptedException ex) {
                 }
 
@@ -235,4 +299,29 @@ public class game implements scoreCallBack{
 
         }
     }
+}
+
+
+class GameOverPanel extends JPanel {
+
+    int x, y, score;
+
+    public GameOverPanel(int x,int y, int score){
+        this.x=x;
+        this.y=y;
+        this.score = score;
+        this.setForeground(Color.LIGHT_GRAY);
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponents(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.fillRect(x, y, 280, 160);
+        g2d.setColor(Color.RED);
+        g2d.drawString("GAME OVER!", 155, 330);
+        g2d.drawString("Your Score is " + score + ".", 145, 350);
+        g2d.drawString("Play Again :)", 155, 370);
+    }
+
 }
