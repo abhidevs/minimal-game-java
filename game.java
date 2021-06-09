@@ -1,9 +1,17 @@
 import java.awt.BorderLayout;
+<<<<<<< HEAD
+=======
+import java.awt.Image;
+>>>>>>> Meteor-Shower
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+<<<<<<< HEAD
+=======
+import java.awt.Toolkit;
+>>>>>>> Meteor-Shower
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +20,13 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+<<<<<<< HEAD
 import javax.swing.JFrame;
+=======
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+>>>>>>> Meteor-Shower
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -35,17 +49,33 @@ import ball.Ball;
 class Balls extends JPanel {
 
     scoreCallBack scoreCallBack;
+<<<<<<< HEAD
 
     private List<Ball> ballsUp;
     public int ballsCount = 6;
 
     public Balls(scoreCallBack callBack) {
         this.scoreCallBack=callBack;
+=======
+    Image sky,meteor;
+    private List<Ball> ballsUp;
+    public int ballsCount = 10;
+
+    public Balls(scoreCallBack callBack) {
+        this.scoreCallBack=callBack;
+        sky=Toolkit.getDefaultToolkit().getImage("./assets/sky.png");
+        meteor=Toolkit.getDefaultToolkit().getImage("./assets/meteor.png");
+>>>>>>> Meteor-Shower
 
         ballsUp = new ArrayList<Ball>(ballsCount);
 
         for (int index = 0; index < ballsCount; index++) {
+<<<<<<< HEAD
             Ball ball=new Ball(getRandomColor());
+=======
+            Ball ball=new Ball(meteor);
+            ball.setSize(30, 30);
+>>>>>>> Meteor-Shower
             ball.setBallValue(String.valueOf(5 + random(45)));
             ballsUp.add(ball);
         }
@@ -56,7 +86,12 @@ class Balls extends JPanel {
                 super.mouseClicked(me);
                 for (Ball ball : ballsUp) {
                     if (verifyBallClick(ball, me.getPoint())) {
+<<<<<<< HEAD
                         ball.setSize(0, 0);
+=======
+                        ball.setRock();
+                        ball.valueColor=new Color(0,0,0,Color.TRANSLUCENT);
+>>>>>>> Meteor-Shower
                         scoreCallBack.ballClicked(ball);
                     }
                 }
@@ -76,9 +111,17 @@ class Balls extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
+<<<<<<< HEAD
         g2d.drawString(String.valueOf("Score: "+scoreCallBack.getScore()), 10, 15);
         g2d.drawString(String.valueOf("Time left: "+scoreCallBack.getTimeLeft()), 145, 15);
         g2d.drawString(String.valueOf("Remaining Clicks: "+scoreCallBack.getRemClicks()), 280, 15);
+=======
+        g2d.drawImage(sky, 0, 0,null);
+        g2d.setColor(Color.WHITE);
+        g2d.drawString(String.valueOf("Score: "+scoreCallBack.getScore()), 10, 15);
+        g2d.drawString(String.valueOf("Time left: "+scoreCallBack.getTimeLeft()), 145, 15);
+        g2d.drawString(String.valueOf("Remaining Clicks: "+scoreCallBack.getRemClicks()), 270, 15);
+>>>>>>> Meteor-Shower
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         for (Ball ball : ballsUp) {
             ball.paint(g2d);
@@ -97,6 +140,7 @@ class Balls extends JPanel {
     public static int random(int maxRange) {
         return (int) Math.round((Math.random() * maxRange));
     }
+<<<<<<< HEAD
 
     public Color getRandomColor() {
         switch (random(7)) {
@@ -118,6 +162,8 @@ class Balls extends JPanel {
                 return new Color(31, 81, 255);
         }
     }
+=======
+>>>>>>> Meteor-Shower
 }
 
 interface scoreCallBack{
@@ -132,8 +178,13 @@ public class game implements scoreCallBack{
 
     static game Game;
     static int score;
+<<<<<<< HEAD
     static int clicks=5;
     static int timeLeft=20;
+=======
+    static int clicks=10;
+    static int timeLeft=30;
+>>>>>>> Meteor-Shower
     Thread engine;
     JFrame frame;
 
@@ -174,6 +225,10 @@ public class game implements scoreCallBack{
         if(setRemClicks())
         score+=Integer.valueOf(ball.getBallValue());
         System.out.println("Score "+"+"+ball.getBallValue()+": "+score);
+<<<<<<< HEAD
+=======
+        ball.setBallValue("");
+>>>>>>> Meteor-Shower
     }
 
     @Override
@@ -273,7 +328,10 @@ public class game implements scoreCallBack{
                         ball.setLocation(new Point(x, y));
                         ball.setSize(35, 35);
                         ball.setBallValue(String.valueOf(5 + random(45)));
+<<<<<<< HEAD
                         ball.setColor(getParent().getRandomColor());
+=======
+>>>>>>> Meteor-Shower
                     }
                     move(ball);
                 }
@@ -310,7 +368,11 @@ class GameOverPanel extends JPanel {
         this.x=x;
         this.y=y;
         this.score = score;
+<<<<<<< HEAD
         this.setForeground(Color.LIGHT_GRAY);
+=======
+        this.setForeground(Color.WHITE);
+>>>>>>> Meteor-Shower
     }
 
     @Override
