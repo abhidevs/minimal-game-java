@@ -1,5 +1,4 @@
 import java.awt.BorderLayout;
-import java.awt.Image;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -12,10 +11,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.*;
-import javax.swing.ImageIcon;
+
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -38,20 +35,17 @@ import ball.Ball;
 class Balls extends JPanel {
 
     scoreCallBack scoreCallBack;
-    Image sky,meteor;
+
     private List<Ball> ballsUp;
-    public int ballsCount = 10;
+    public int ballsCount = 6;
 
     public Balls(scoreCallBack callBack) {
         this.scoreCallBack=callBack;
-        sky=Toolkit.getDefaultToolkit().getImage("./assets/sky.png");
-        meteor=Toolkit.getDefaultToolkit().getImage("./assets/meteor.png");
 
         ballsUp = new ArrayList<Ball>(ballsCount);
 
         for (int index = 0; index < ballsCount; index++) {
-            Ball ball=new Ball(meteor);
-            ball.setSize(30, 30);
+            Ball ball=new Ball(getRandomColor());
             ball.setBallValue(String.valueOf(5 + random(45)));
             ballsUp.add(ball);
         }
@@ -62,8 +56,7 @@ class Balls extends JPanel {
                 super.mouseClicked(me);
                 for (Ball ball : ballsUp) {
                     if (verifyBallClick(ball, me.getPoint())) {
-                        ball.setRock();
-                        ball.valueColor=new Color(0,0,0,Color.TRANSLUCENT);
+                        ball.setSize(0, 0);
                         scoreCallBack.ballClicked(ball);
                     }
                 }
@@ -83,11 +76,9 @@ class Balls extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.drawImage(sky, 0, 0,null);
-        g2d.setColor(Color.WHITE);
         g2d.drawString(String.valueOf("Score: "+scoreCallBack.getScore()), 10, 15);
         g2d.drawString(String.valueOf("Time left: "+scoreCallBack.getTimeLeft()), 145, 15);
-        g2d.drawString(String.valueOf("Remaining Clicks: "+scoreCallBack.getRemClicks()), 270, 15);
+        g2d.drawString(String.valueOf("Remaining Clicks: "+scoreCallBack.getRemClicks()), 280, 15);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         for (Ball ball : ballsUp) {
             ball.paint(g2d);
@@ -106,6 +97,27 @@ class Balls extends JPanel {
     public static int random(int maxRange) {
         return (int) Math.round((Math.random() * maxRange));
     }
+
+    public Color getRandomColor() {
+        switch (random(7)) {
+            case 1:
+                return new Color(31, 81, 255);
+            case 2:
+                return new Color(0, 255, 127);
+            case 3:
+                return new Color(255, 0, 0);
+            case 4:
+                return new Color( 255, 195, 0 );
+            case 5:
+                return new Color(255, 87, 51);
+            case 6:
+                return new Color( 125, 249, 255 );
+            case 7:
+                return new Color( 255, 125, 184 );
+            default:
+                return new Color(31, 81, 255);
+        }
+    }
 }
 
 interface scoreCallBack{
@@ -120,8 +132,8 @@ public class game implements scoreCallBack{
 
     static game Game;
     static int score;
-    static int clicks=10;
-    static int timeLeft=30;
+    static int clicks=5;
+    static int timeLeft=20;
     Thread engine;
     JFrame frame;
 
@@ -162,7 +174,6 @@ public class game implements scoreCallBack{
         if(setRemClicks())
         score+=Integer.valueOf(ball.getBallValue());
         System.out.println("Score "+"+"+ball.getBallValue()+": "+score);
-        ball.setBallValue("");
     }
 
     @Override
@@ -262,6 +273,7 @@ public class game implements scoreCallBack{
                         ball.setLocation(new Point(x, y));
                         ball.setSize(35, 35);
                         ball.setBallValue(String.valueOf(5 + random(45)));
+                        ball.setColor(getParent().getRandomColor());
                     }
                     move(ball);
                 }
@@ -298,7 +310,7 @@ class GameOverPanel extends JPanel {
         this.x=x;
         this.y=y;
         this.score = score;
-        this.setForeground(Color.WHITE);
+        this.setForeground(Color.LIGHT_GRAY);
     }
 
     @Override
